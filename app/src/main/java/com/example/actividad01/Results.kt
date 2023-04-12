@@ -11,6 +11,10 @@ class Results : AppCompatActivity() {
         setContentView(R.layout.activity_results)
         result.setText(intent.getStringExtra("result"))
 
+        share.setOnClickListener {
+            share()
+        }
+
         back.setOnClickListener {
             back()
         }
@@ -19,5 +23,16 @@ class Results : AppCompatActivity() {
     fun back(){
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
+    }
+
+    fun share(){
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, intent.getStringExtra("result"))
+            type = "text/plain"
+        }
+
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
     }
 }

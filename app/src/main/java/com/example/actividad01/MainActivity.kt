@@ -5,6 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.text.SpannableStringBuilder
+import android.view.View
+import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -17,81 +21,174 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setBackgroundDrawable(
             ColorDrawable(Color.parseColor("#FF018786"))
         )
-
-        plus.setOnClickListener {
-            add()
-        }
-
-        minus.setOnClickListener {
-            subtract()
-        }
-
-        multiply.setOnClickListener {
-            multiply()
-        }
-
-        divide.setOnClickListener {
-            divide()
-        }
-
     }
 
-    fun inputIsNotEmpty(): Boolean {
-        var b = true;
-        if (input1.text.toString().trim().isEmpty()) {
-            input1.error = "Required"
-            input1.requestFocus()
-            b = false;
-        }
-        if (input2.text.toString().trim().isEmpty()) {
-            input2.error = "Required"
-            input2.requestFocus()
-            b = false;
-        }
-        return b;
+    private val expressionTextView: TextView by lazy {
+        findViewById<TextView>(R.id.txt_expression)
+    }
+    private val resultTextView: TextView by lazy {
+        findViewById<TextView>(R.id.txt_result)
     }
 
-    fun add() {
-        if (inputIsNotEmpty()) {
-            var inputdata1 = input1.text.toString().trim().toBigDecimal()
-            var inputdata2 = input2.text.toString().trim().toBigDecimal()
-            openResult(inputdata1.add(inputdata2).toString())
-        }
-    }
+    private var isOperator = false
+    private var hasOperator = false
 
-    fun subtract() {
-        if (inputIsNotEmpty()) {
-            var inputdata1 = input1.text.toString().trim().toBigDecimal()
-            var inputdata2 = input2.text.toString().trim().toBigDecimal()
-            openResult(inputdata1.subtract(inputdata2).toString())
-        }
-    }
+    fun buttonClicked(v: View) {
+        when (v.id) {
+            R.id.btn_00 -> numberButtonClicked("00")
+            R.id.btn_0 -> numberButtonClicked("0")
+            R.id.btn_1 -> numberButtonClicked("1")
+            R.id.btn_2 -> numberButtonClicked("2")
+            R.id.btn_3 -> numberButtonClicked("3")
+            R.id.btn_4 -> numberButtonClicked("4")
+            R.id.btn_5 -> numberButtonClicked("5")
+            R.id.btn_6 -> numberButtonClicked("6")
+            R.id.btn_7 -> numberButtonClicked("7")
+            R.id.btn_8 -> numberButtonClicked("8")
+            R.id.btn_9 -> numberButtonClicked("9")
 
-    fun multiply() {
-        if (inputIsNotEmpty()) {
-            var inputdata1 = input1.text.toString().trim().toBigDecimal()
-            var inputdata2 = input2.text.toString().trim().toBigDecimal()
-            openResult(inputdata1.multiply(inputdata2).toString())
+            R.id.btn_plus -> operatorButtonClicked("+")
+            R.id.btn_minus -> operatorButtonClicked("-")
+            R.id.btn_multi -> operatorButtonClicked("X")
+            R.id.btn_div -> operatorButtonClicked("/")
+            R.id.btn_mod -> operatorButtonClicked("%")
         }
     }
 
 
-    fun divide() {
-        if (inputIsNotEmpty()) {
-            var inputdata1 = input1.text.toString().trim().toBigDecimal()
-            var inputdata2 = input2.text.toString().trim().toBigDecimal()
+    private fun numberButtonClicked(number: String) {
+        if (isOperator) {
+            expressionTextView.append(" ")
+        }
+        isOperator = false
 
-            if (inputdata2.compareTo(BigDecimal.ZERO) == 0) {
-                input2.error = "invalid input"
-            } else {
-                openResult(inputdata1.divide(inputdata2, 2, RoundingMode.HALF_UP).toString())
+        val expressionText = expressionTextView.text.split(" ")
+
+        expressionTextView.append(number)
+        resultTextView.text = calculateExpression()
+    }
+
+    private fun operatorButtonClicked(operator: String) {
+        if (expressionTextView.text.isEmpty()) {
+            return
+        }
+
+        when {
+            isOperator -> {
+                val text = expressionTextView.text.toString()
+                expressionTextView.text = text.dropLast(1) + operator
+            }
+            hasOperator -> {
+                Toast.makeText(this, "El operador solo se puede usar una vez.", Toast.LENGTH_SHORT).show()
+                return
+            }
+            else -> {
+                expressionTextView.append(" $operator")
+            }
+
+        }
+        val ssb = SpannableStringBuilder(expressionTextView.text)
+
+        expressionTextView.text = ssb
+        isOperator = true
+        hasOperator = true
+    }
+
+    fun resultButtonClicked(v: View) {
+        val expressionTexts = expressionTextView.text.split(" ")
+        if (expressionTextView.text.isEmpty() || expressionTexts.size == 1) {
+            return
+        }
+        if (expressionTexts.size != 3 && hasOperator) {
+            Toast.makeText(this, "Complete la expresión", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (expressionTexts[0].isNumber().not() || expressionTexts[2].isNumber().not()) {
+            Toast.makeText(this, "Ocurrió un error.", Toast.LENGTH_SHORT).show()
+
+            return
+        }
+        val expressionText = expressionTextView.text.toString()
+        val resultText = calculateExpression()
+
+        resultTextView.text = ""
+        expressionTextView.text = resultText
+
+        isOperator = false
+        hasOperator = false
+
+        openResult(resultText)
+
+    }
+
+
+    private fun calculateExpression(): String {
+        val expressionTexts = expressionTextView.text.split(" ")
+
+        if (hasOperator.not() || expressionTexts.size != 3) {
+            return ""
+        } else if (expressionTexts[0].isNumber().not() || expressionTexts[2].isNumber().not()) {
+            return ""
+        }
+        val exp1 = expressionTexts[0].toBigInteger()
+        val exp2 = expressionTexts[2].toBigInteger()
+        val op = expressionTexts[1]
+
+        return when (op) {
+            "+" -> (exp1 + exp2).toString()
+            "-" -> (exp1 - exp2).toString()
+            "X" -> (exp1 * exp2).toString()
+            "%" -> (exp1 % exp2).toString()
+            "/" -> (exp1 / exp2).toString()
+            else -> ""
+        }
+    }
+
+    fun dotButtonClicked(v: View) {
+        if (hasOperator != true) {
+            if (expressionTextView.text.length == 0) {
+                expressionTextView.append("0.")
+            } else if (!expressionTextView.text.toString().contains(".")) {
+                expressionTextView.append(".")
+            }
+        } else {
+            if (resultTextView.text.length == 0) {
+                resultTextView.append("0.")
+            } else if (resultTextView.text.length != 0 && resultTextView.text.toString()
+                    .contains(".")
+            ) {
+                resultTextView.append(".")
             }
         }
+
     }
 
-    fun openResult(value: String){
+    fun clearButtonClicked(v: View) {
+        expressionTextView.text = ""
+        resultTextView.text = ""
+        isOperator = false
+        hasOperator = false
+    }
+
+    fun backButtonClicked(v: View) {
+        expressionTextView.setText(expressionTextView.text.dropLast(1))
+        isOperator = false
+        hasOperator = false
+    }
+
+    fun String.isNumber(): Boolean {
+        return try {
+            this.toBigInteger()
+            true
+        } catch (e: NumberFormatException) {
+            false
+        }
+    }
+
+    fun openResult(value: String) {
         val intent = Intent(this, Results::class.java)
         intent.putExtra("result", value)
         startActivity(intent)
     }
+
 }
