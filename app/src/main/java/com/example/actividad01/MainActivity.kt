@@ -14,15 +14,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
+    private var isOperator = false;
+    private var hasOneOperator = false;
+
     private val expressionTextView: TextView by lazy {
         findViewById<TextView>(R.id.txt_expression)
     }
+
     private val resultTextView: TextView by lazy {
         findViewById<TextView>(R.id.txt_result)
     }
-
-    private var isOperator = false
-    private var hasOneOperator = false
 
     fun clickButton(v: View) {
         when (v.id) {
@@ -36,14 +37,12 @@ class MainActivity : AppCompatActivity() {
             R.id.btn_7 -> numericButton("7")
             R.id.btn_8 -> numericButton("8")
             R.id.btn_9 -> numericButton("9")
-
             R.id.btn_plus -> operatorButton("+")
             R.id.btn_minus -> operatorButton("-")
             R.id.btn_multi -> operatorButton("X")
             R.id.btn_div -> operatorButton("/")
         }
     }
-
 
     private fun numericButton(number: String) {
         if (isOperator) {
@@ -58,7 +57,6 @@ class MainActivity : AppCompatActivity() {
         if (expressionTextView.text.isEmpty()) {
             return
         }
-
         when {
             isOperator -> {
                 val text = expressionTextView.text.toString()
@@ -70,10 +68,8 @@ class MainActivity : AppCompatActivity() {
             else -> {
                 expressionTextView.append(" $operator")
             }
-
         }
         val ssb = SpannableStringBuilder(expressionTextView.text)
-
         expressionTextView.text = ssb
         isOperator = true
         hasOneOperator = true
