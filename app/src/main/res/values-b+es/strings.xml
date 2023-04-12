@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Calculadora VIU</string>
+    <string name="share">Compartir</string>
+    <string name="back">Regresar</string>
+</resources>

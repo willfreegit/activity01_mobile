@@ -1,7 +1,5 @@
 <resources>
-    <string name="app_name">Activity01</string>
-    <string name="input01">Enter 1st number</string>
-    <string name="input02">Enter 2st number</string>
+    <string name="app_name">Calculator VIU</string>
     <string name="share">Share</string>
     <string name="back">Return</string>
 </resources>

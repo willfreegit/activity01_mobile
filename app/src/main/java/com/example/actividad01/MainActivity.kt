@@ -3,24 +3,15 @@ package com.example.actividad01
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.text.SpannableStringBuilder
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_main.*
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        supportActionBar?.setBackgroundDrawable(
-            ColorDrawable(Color.parseColor("#FF018786"))
-        )
     }
 
     private val expressionTextView: TextView by lazy {
@@ -31,44 +22,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var isOperator = false
-    private var hasOperator = false
+    private var hasOneOperator = false
 
-    fun buttonClicked(v: View) {
+    fun clickButton(v: View) {
         when (v.id) {
-            R.id.btn_00 -> numberButtonClicked("00")
-            R.id.btn_0 -> numberButtonClicked("0")
-            R.id.btn_1 -> numberButtonClicked("1")
-            R.id.btn_2 -> numberButtonClicked("2")
-            R.id.btn_3 -> numberButtonClicked("3")
-            R.id.btn_4 -> numberButtonClicked("4")
-            R.id.btn_5 -> numberButtonClicked("5")
-            R.id.btn_6 -> numberButtonClicked("6")
-            R.id.btn_7 -> numberButtonClicked("7")
-            R.id.btn_8 -> numberButtonClicked("8")
-            R.id.btn_9 -> numberButtonClicked("9")
+            R.id.btn_0 -> numericButton("0")
+            R.id.btn_1 -> numericButton("1")
+            R.id.btn_2 -> numericButton("2")
+            R.id.btn_3 -> numericButton("3")
+            R.id.btn_4 -> numericButton("4")
+            R.id.btn_5 -> numericButton("5")
+            R.id.btn_6 -> numericButton("6")
+            R.id.btn_7 -> numericButton("7")
+            R.id.btn_8 -> numericButton("8")
+            R.id.btn_9 -> numericButton("9")
 
-            R.id.btn_plus -> operatorButtonClicked("+")
-            R.id.btn_minus -> operatorButtonClicked("-")
-            R.id.btn_multi -> operatorButtonClicked("X")
-            R.id.btn_div -> operatorButtonClicked("/")
-            R.id.btn_mod -> operatorButtonClicked("%")
+            R.id.btn_plus -> operatorButton("+")
+            R.id.btn_minus -> operatorButton("-")
+            R.id.btn_multi -> operatorButton("X")
+            R.id.btn_div -> operatorButton("/")
         }
     }
 
 
-    private fun numberButtonClicked(number: String) {
+    private fun numericButton(number: String) {
         if (isOperator) {
             expressionTextView.append(" ")
         }
         isOperator = false
-
-        val expressionText = expressionTextView.text.split(" ")
-
         expressionTextView.append(number)
         resultTextView.text = calculateExpression()
     }
 
-    private fun operatorButtonClicked(operator: String) {
+    private fun operatorButton(operator: String) {
         if (expressionTextView.text.isEmpty()) {
             return
         }
@@ -78,8 +64,7 @@ class MainActivity : AppCompatActivity() {
                 val text = expressionTextView.text.toString()
                 expressionTextView.text = text.dropLast(1) + operator
             }
-            hasOperator -> {
-                Toast.makeText(this, "El operador solo se puede usar una vez.", Toast.LENGTH_SHORT).show()
+            hasOneOperator -> {
                 return
             }
             else -> {
@@ -91,41 +76,32 @@ class MainActivity : AppCompatActivity() {
 
         expressionTextView.text = ssb
         isOperator = true
-        hasOperator = true
+        hasOneOperator = true
     }
 
-    fun resultButtonClicked(v: View) {
+    fun clickResult(v: View) {
         val expressionTexts = expressionTextView.text.split(" ")
         if (expressionTextView.text.isEmpty() || expressionTexts.size == 1) {
             return
         }
-        if (expressionTexts.size != 3 && hasOperator) {
-            Toast.makeText(this, "Complete la expresión", Toast.LENGTH_SHORT).show()
+        if (expressionTexts.size != 3 && hasOneOperator) {
             return
         }
         if (expressionTexts[0].isNumber().not() || expressionTexts[2].isNumber().not()) {
-            Toast.makeText(this, "Ocurrió un error.", Toast.LENGTH_SHORT).show()
-
             return
         }
-        val expressionText = expressionTextView.text.toString()
         val resultText = calculateExpression()
-
         resultTextView.text = ""
         expressionTextView.text = resultText
-
         isOperator = false
-        hasOperator = false
-
+        hasOneOperator = false
         openResult(resultText)
-
     }
 
 
     private fun calculateExpression(): String {
         val expressionTexts = expressionTextView.text.split(" ")
-
-        if (hasOperator.not() || expressionTexts.size != 3) {
+        if (hasOneOperator.not() || expressionTexts.size != 3) {
             return ""
         } else if (expressionTexts[0].isNumber().not() || expressionTexts[2].isNumber().not()) {
             return ""
@@ -133,7 +109,6 @@ class MainActivity : AppCompatActivity() {
         val exp1 = expressionTexts[0].toBigInteger()
         val exp2 = expressionTexts[2].toBigInteger()
         val op = expressionTexts[1]
-
         return when (op) {
             "+" -> (exp1 + exp2).toString()
             "-" -> (exp1 - exp2).toString()
@@ -144,8 +119,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun dotButtonClicked(v: View) {
-        if (hasOperator != true) {
+    fun clickDot(v: View) {
+        if (hasOneOperator != true) {
             if (expressionTextView.text.length == 0) {
                 expressionTextView.append("0.")
             } else if (!expressionTextView.text.toString().contains(".")) {
@@ -161,19 +136,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    }
-
-    fun clearButtonClicked(v: View) {
-        expressionTextView.text = ""
-        resultTextView.text = ""
-        isOperator = false
-        hasOperator = false
-    }
-
-    fun backButtonClicked(v: View) {
-        expressionTextView.setText(expressionTextView.text.dropLast(1))
-        isOperator = false
-        hasOperator = false
     }
 
     fun String.isNumber(): Boolean {
