@@ -102,8 +102,8 @@ class MainActivity : AppCompatActivity() {
         } else if (expressionTexts[0].isNumber().not() || expressionTexts[2].isNumber().not()) {
             return ""
         }
-        val exp1 = expressionTexts[0].toBigInteger()
-        val exp2 = expressionTexts[2].toBigInteger()
+        val exp1 = expressionTexts[0].toDouble()
+        val exp2 = expressionTexts[2].toDouble()
         val op = expressionTexts[1]
         return when (op) {
             "+" -> (exp1 + exp2).toString()
@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
 
     fun String.isNumber(): Boolean {
         return try {
-            this.toBigInteger()
+            this.toDouble()
             true
         } catch (e: NumberFormatException) {
             false
